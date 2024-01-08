@@ -1,6 +1,6 @@
 #include "kernels.h"
 
-#define TILE_WIDTH 5
+#define TILE_WIDTH 16
 
 // Convolution forward kernel: Naive implementation
 __global__ void conv_forward_kernel(const float *in, float *out, const float *weight,
@@ -56,9 +56,10 @@ __global__ void conv_forward_kernel_1(const float *in, volatile float* out, cons
     int height_out = height_in - kernel_width + 1;
     int width_out = width_in - kernel_width + 1;
 
+
     // _shared_ float shared_in[TILE_WIDTH][TILE_WIDTH];
     // _shared_ float shared_weight[TILE_WIDTH][TILE_WIDTH];
-    extern __shared__ float shared_data[];
+    __shared__ float shared_data[TILE_WIDTH*TILE_WIDTH*2];
 
     float* shared_in = (float*)&shared_data[0];//allocation index 0
 	float* shared_weight = (float*)&shared_data[TILE_WIDTH * TILE_WIDTH];//allocation after index(X_tile*X_tile)
