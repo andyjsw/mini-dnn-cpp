@@ -146,17 +146,13 @@ __host__ void kernel_manager::conv_forward(const float *in, float *out, const fl
         CHECK(cudaDeviceSynchronize());
         CHECK(cudaGetLastError());
     } else if (kernel_type == 1) {
-        int n_streams = 1;
-        cudaStream_t *streams = (cudaStream_t *)malloc(n_streams * sizeof(cudaStream_t));
-        for (int i = 0; i < n_streams; i++)
-            CHECK(cudaStreamCreate(&(streams[i])));
         size_t sharedMemSize = TILE_WIDTH*TILE_WIDTH*sizeof(float)*2;
-        conv_forward_kernel_1<<<dimGrid, dimBlock, sharedMemSize, stream[0]>>>(d_in, d_out, d_weight, channel_in, channel_out, height_in, width_in, kernel_width);
+        conv_forward_kernel_1<<<dimGrid, dimBlock, sharedMemSize>>>(d_in, d_out, d_weight, channel_in, channel_out, height_in, width_in, kernel_width);
         CHECK(cudaDeviceSynchronize());
         CHECK(cudaGetLastError());
     }
     
-    CHECK(cudaMemcpyAsync(out, d_out, size_out * sizeof(float), cudaMemcpyDeviceToHost));
+    // CHECK(cudaMemcpyAsync(out, d_out, size_out * sizeof(float), cudaMemcpyDeviceToHost));
     
     CHECK(cudaMemcpy(out, d_out, size_out * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(d_in));
