@@ -105,9 +105,9 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
 
 __host__ void kernel_manager::conv_forward(const float *in, float *out, const float *weight,
                                          const int n_samples, const int channel_in, const int channel_out,
-                                         const int height_in, const int width_in, const int kernel_width)
+                                         const int height_in, const int width_in, const int kernel_width, const int kernel_type)
 {
-       int height_out = height_in - kernel_width + 1;
+    int height_out = height_in - kernel_width + 1;
     int width_out = width_in - kernel_width + 1;
     int size_in = n_samples * channel_in * height_in * width_in;
     int size_out = n_samples * channel_out * height_out * width_out;
@@ -127,25 +127,24 @@ __host__ void kernel_manager::conv_forward(const float *in, float *out, const fl
     int width_grid = (width_out - 1) / TILE_WIDTH + 1;
     int z = height_grid * width_grid;
     
-
-    //int n_samples_per_stream_ = min(n_samples - offset, n_samples_per_stream);
-    // int size_in = n_samples * channel_in * height_in * width_in;
-    // int size_out = n_samples * channel_out * height_out * width_out;
-    // int size_in_per_sample = channel_in * height_in * width_in;
-    // int size_out_per_sample = channel_out * height_out * width_out;
-
     CHECK(cudaMemcpyAsync(d_in, in, size_in * sizeof(float), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpyAsync(d_weight, weight, size_weight * sizeof(float), cudaMemcpyHostToDevice));
 
     dim3 dimGrid(channel_out, z, n_samples);
     dim3 dimBlock(TILE_WIDTH, TILE_WIDTH, 1);
-    //size_t sharedMemSize = TILE_WIDTH*TILE_WIDTH*sizeof(float)*2;
 
-    conv_forward_kernel<<<dimGrid, dimBlock, 0>>>(d_in, d_out, d_weight, channel_in, channel_out, height_in, width_in, kernel_width);
+    if (kernel_type == 0) {
+        conv_forward_kernel<<<dimGrid, dimBlock, 0>>>(d_in, d_out, d_weight, channel_in, channel_out, height_in, width_in, kernel_width);
+        CHECK(cudaDeviceSynchronize());
+        CHECK(cudaGetLastError());
+    } else if (kernel_type == 1) {
+        size_t sharedMemSize = TILE_WIDTH*TILE_WIDTH*sizeof(float)*2;
+        conv_forward_kernel_1<<<dimGrid, dimBlock, sharedMemSize>>>(d_in, d_out, d_weight, channel_in, channel_out, height_in, width_in, kernel_width);
+        CHECK(cudaDeviceSynchronize());
+        CHECK(cudaGetLastError());
+    }
+    
     CHECK(cudaMemcpyAsync(out, d_out, size_out * sizeof(float), cudaMemcpyDeviceToHost));
-
-    CHECK(cudaDeviceSynchronize());
-    CHECK(cudaGetLastError());
     
     CHECK(cudaMemcpy(out, d_out, size_out * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(d_in));
