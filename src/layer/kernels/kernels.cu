@@ -49,15 +49,24 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
                                       const int channel_int, const int channel_out,
                                       const int height_in, const int width_in, const int kernel_width)
 {
+    int bx = blockIdx.x;
     int by = blockIdx.y;
     int tx = threadIdx.x;
     int ty = threadIdx.y;
     int sample_idx = blockIdx.z;
     int height_out = height_in - kernel_width + 1;
     int width_out = width_in - kernel_width + 1;
+    int size_in = channel_int * height_in * width_in;
+    int size_out = channel_out * height_out * width_out;
+    int size_weight = channel_out * channel_int * kernel_width * kernel_width;
 
-    __shared__ float shared_in[TILE_WIDTH][TILE_WIDTH];
-    __shared__ float shared_weight[TILE_WIDTH][TILE_WIDTH];
+
+    // _shared_ float shared_in[TILE_WIDTH][TILE_WIDTH];
+    // _shared_ float shared_weight[TILE_WIDTH][TILE_WIDTH];
+    __shared__ float shared_data[TILE_WIDTH*TILE_WIDTH*2];
+
+    float* shared_in = (float*)&shared_data[0];//allocation index 0
+	float* shared_weight = (float*)&shared_data[TILE_WIDTH * TILE_WIDTH];//allocation after index(X_tile*X_tile)
 
     int row = (by / ((width_out - 1) / TILE_WIDTH + 1)) * TILE_WIDTH + ty;
     int col = (by % ((width_out - 1) / TILE_WIDTH + 1)) * TILE_WIDTH + tx;
@@ -66,22 +75,24 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
     int row_weight = ty;
     int col_weight = tx;
 
+    int in_index = ty*TILE_WIDTH + tx;
     if (row_in < height_in && col_in < width_in)
     {
-        shared_in[ty][tx] = in[sample_idx * channel_int * height_in * width_in + row_in * width_in + col_in];
+        shared_in[in_index] = in[sample_idx * channel_int * height_in * width_in + row_in * width_in + col_in];
     }
     else
     {
-        shared_in[ty][tx] = 0;
+        shared_in[in_index] = 0;
     }
 
+    int weight_index = in_index;
     if (row_weight < kernel_width && col_weight < kernel_width)
     {
-        shared_weight[ty][tx] = weight[sample_idx * channel_out * channel_int * kernel_width * kernel_width + row_weight * kernel_width + col_weight];
+        shared_weight[weight_index] = weight[sample_idx * channel_out * channel_int * kernel_width * kernel_width + row_weight * kernel_width + col_weight];
     }
     else
     {
-        shared_weight[ty][tx] = 0;
+        shared_weight[weight_index] = 0;
     }
 
     __syncthreads();
@@ -95,7 +106,7 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
             {
                 for (int k = 0; k < kernel_width; k++)
                 {
-                    sum += shared_in[ty + j][tx + k] * shared_weight[row_weight + j][col_weight + k];
+                    sum += shared_in[(ty + j) * TILE_WIDTH + (tx + k)] * shared_weight[(row_weight + j) * TILE_WIDTH + (col_weight + k)];
                 }
             }
         }
