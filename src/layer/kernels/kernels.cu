@@ -56,8 +56,8 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
     int height_out = height_in - kernel_width + 1;
     int width_out = width_in - kernel_width + 1;
 
-    __shared__ float shared_in[TILE_WIDTH][TILE_WIDTH];
-    __shared__ float shared_weight[TILE_WIDTH][TILE_WIDTH];
+    extern __shared__ float shared_in[TILE_WIDTH][TILE_WIDTH];
+    extern __shared__ float shared_weight[TILE_WIDTH][TILE_WIDTH];
 
     int row = (by / ((width_out - 1) / TILE_WIDTH + 1)) * TILE_WIDTH + ty;
     int col = (by % ((width_out - 1) / TILE_WIDTH + 1)) * TILE_WIDTH + tx;
