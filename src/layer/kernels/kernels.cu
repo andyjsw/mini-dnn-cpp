@@ -105,7 +105,8 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
 
 __host__ void kernel_manager::conv_forward(const float *in, float *out, const float *weight,
                                          const int n_samples, const int channel_in, const int channel_out,
-                                         const int height_in, const int width_in, const int kernel_width, const int kernel_type)
+                                         const int height_in, const int width_in, const int kernel_width, 
+                                         const int kernel_type)
 {
     int height_out = height_in - kernel_width + 1;
     int width_out = width_in - kernel_width + 1;
