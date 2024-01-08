@@ -42,6 +42,7 @@ int main() {
   std::cout << "-----------------------------------------" << std::endl;
 
   GpuTimer timer;
+  float acc = 0;
 
   std::cout << "GPU version:" << std::endl;
   Network gpu_dnn;
