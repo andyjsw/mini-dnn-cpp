@@ -1,5 +1,5 @@
-#ifndef SRC_LAYER_kernels_HELPER_H_
-#define SRC_LAYER_kernels_HELPER_H_
+#ifndef SRC_LAYER_KERNELS_HELPER_H_
+#define SRC_LAYER_KERNELS_HELPER_H_
 #pragma once
 
 #include <stdio.h>
@@ -65,4 +65,4 @@ public:
     void print_device_info();
 };
 
-#endif /* SRC_LAYER_kernels_HELPER_H_ */
+#endif /* SRC_LAYER_KERNELS_HELPER_H_ */
