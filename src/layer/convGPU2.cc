@@ -67,7 +67,7 @@ void ConvGPU2::forward(const Matrix &bottom)
     float* w = (float*)weight.data();
     
     kernel_manager executor;
-    executor.conv_forward(in, out, w, n_sample, channel_in, channel_out, height_in, width_in, height_kernel, 0);
+    executor.conv_forward(in, out, w, n_sample, channel_in, channel_out, height_in, width_in, height_kernel, 1);
 }
 
 
