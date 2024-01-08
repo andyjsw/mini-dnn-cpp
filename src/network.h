@@ -4,6 +4,8 @@
 
 #include <stdlib.h>
 #include <vector>
+#include <fstream>
+#include <iostream>
 #include "./layer.h"
 #include "./loss.h"
 #include "./optimizer.h"
@@ -43,6 +45,11 @@ class Network {
   /// Debugging tool to check parameter gradients
   void check_gradient(const Matrix& input, const Matrix& target, int n_points,
                       int seed = -1);
+
+  /// Save the parameters to a file
+  void save_parameters(std::string filename);
+  /// Load the parameters from a file
+  void load_parameters(std::string filename);
 };
 
 #endif  // SRC_NETWORK_H_

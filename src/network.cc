@@ -111,3 +111,38 @@ void Network::check_gradient(const Matrix& input, const Matrix& target,
   // Restore original parameters
   this->set_parameters(param);
 }
+
+void Network::save_parameters(std::string filename)
+{
+    std::vector<std::vector<float>> param = this->get_parameters();
+    std::ofstream fout(filename);
+    if (!fout.is_open())
+        throw std::runtime_error("Cannot open file " + filename);
+    for (int i = 0; i < param.size(); i++)
+    {
+        for (int j = 0; j < param[i].size(); j++)
+            fout << param[i][j] << " ";
+        fout << std::endl;
+    }
+    fout.close();
+}
+
+void Network::load_parameters(std::string filename)
+{
+    std::ifstream fin(filename);
+    if (!fin.is_open())
+        throw std::runtime_error("Cannot open file " + filename);
+    std::vector<std::vector<float>> param;
+    std::string line;
+    while (std::getline(fin, line))
+    {
+        std::vector<float> row;
+        std::stringstream ss(line);
+        float val;
+        while (ss >> val)
+            row.push_back(val);
+        param.push_back(row);
+    }
+    fin.close();
+    this->set_parameters(param);
+}
