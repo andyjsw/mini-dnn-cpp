@@ -128,8 +128,8 @@ __host__ void kernel_manager::conv_forward(const float *in, float *out, const fl
     int width_grid = (width_out - 1) / TILE_WIDTH + 1;
     int z = height_grid * width_grid;
     
-    CHECK(cudaMemcpyAsync(d_in, in, size_in * sizeof(float), cudaMemcpyHostToDevice));
-    CHECK(cudaMemcpyAsync(d_weight, weight, size_weight * sizeof(float), cudaMemcpyHostToDevice));
+    // CHECK(cudaMemcpyAsync(d_in, in, size_in * sizeof(float), cudaMemcpyHostToDevice));
+    // CHECK(cudaMemcpyAsync(d_weight, weight, size_weight * sizeof(float), cudaMemcpyHostToDevice));
 
     dim3 dimGrid(channel_out, z, n_samples);
     dim3 dimBlock(TILE_WIDTH, TILE_WIDTH, 1);
