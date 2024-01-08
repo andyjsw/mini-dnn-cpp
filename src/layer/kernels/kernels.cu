@@ -10,7 +10,6 @@ __global__ void conv_forward_kernel(const float *in, float *out, const float *we
     const int height_out = height_in - kernel_width + 1;
     const int width_out = width_in - kernel_width + 1;
 
-    int height_grid = (height_out - 1) / TILE_WIDTH + 1;
     int width_grid = (width_out - 1) / TILE_WIDTH + 1;
 
     int sample_idx = blockIdx.z;
@@ -50,16 +49,12 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
                                       const int channel_int, const int channel_out,
                                       const int height_in, const int width_in, const int kernel_width)
 {
-    int bx = blockIdx.x;
     int by = blockIdx.y;
     int tx = threadIdx.x;
     int ty = threadIdx.y;
     int sample_idx = blockIdx.z;
     int height_out = height_in - kernel_width + 1;
     int width_out = width_in - kernel_width + 1;
-    int size_in = channel_int * height_in * width_in;
-    int size_out = channel_out * height_out * width_out;
-    int size_weight = channel_out * channel_int * kernel_width * kernel_width;
 
     __shared__ float shared_in[TILE_WIDTH][TILE_WIDTH];
     __shared__ float shared_weight[TILE_WIDTH][TILE_WIDTH];
@@ -100,8 +95,6 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
             {
                 for (int k = 0; k < kernel_width; k++)
                 {
-                    int pixel_row = row + j;
-                    int pixel_col = col + k;
                     sum += shared_in[ty + j][tx + k] * shared_weight[row_weight + j][col_weight + k];
                 }
             }
@@ -128,10 +121,6 @@ __host__ void kernel_manager::conv_forward(const float *in, float *out, const fl
     CHECK(cudaMalloc((void **)&d_weight, size_weight * sizeof(float)));
     CHECK(cudaMemcpy(d_in, in, size_in * sizeof(float), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d_weight, weight, size_weight * sizeof(float), cudaMemcpyHostToDevice));
-
-    int size_in_per_sample = channel_in * height_in * width_in;
-    int size_out_per_sample = channel_out * height_out * width_out;
-    int size_weight_per_sample = channel_out * channel_in * kernel_width * kernel_width;
 
     // Set grid and block dimensions and launch the kernel
     int height_grid = (height_out - 1) / TILE_WIDTH + 1;
