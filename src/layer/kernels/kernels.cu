@@ -63,7 +63,7 @@ __global__ void conv_forward_kernel_1(const float *in, volatile float* out, cons
 
     // _shared_ float shared_in[TILE_WIDTH][TILE_WIDTH];
     // _shared_ float shared_weight[TILE_WIDTH][TILE_WIDTH];
-    __shared__ float shared_data[TILE_WIDTH*TILE_WIDTH*2];
+    extern __shared__ float shared_data[];
 
     float* shared_in = (float*)&shared_data[0];//allocation index 0
 	float* shared_weight = (float*)&shared_data[TILE_WIDTH * TILE_WIDTH];//allocation after index(X_tile*X_tile)
