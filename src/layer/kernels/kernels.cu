@@ -45,7 +45,7 @@ __global__ void conv_forward_kernel(const float *in, float *out, const float *we
 
 // Convolution forward kernel: Shared memory implementation
 // TODO: Create a seprarate file for shared memory implementation
-__global__ void conv_forward_kernel_1(const float *in, volatile float* out, const float *weight,
+__global__ void conv_forward_kernel_1(const float *in, float *out, const float *weight,
                                       const int channel_int, const int channel_out,
                                       const int height_in, const int width_in, const int kernel_width)
 {
