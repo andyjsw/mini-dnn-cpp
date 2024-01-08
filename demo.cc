@@ -86,11 +86,11 @@ int main() {
 
   std::cout << "GPU version 2:" << std::endl;
   Network gpu_dnn2;
-  Layer *gpu_conv12 = new ConvGPU2(1, 28, 28, 6, 5, 5, 1, 0, 0, 2);
+  Layer *gpu_conv12 = new ConvGPU2(1, 28, 28, 6, 5, 5, 1, 1, 1);
   Layer *gpu_pool12 = new MaxPooling(6, 24, 24, 2, 2, 2);
-  Layer *gpu_conv22 = new ConvGPU2(6, 12, 12, 16, 5, 5, 1, 0, 0, 2);
+  Layer *gpu_conv22 = new ConvGPU2(6, 12, 12, 16, 5, 5, 1, 1, 1);
   Layer *gpu_pool22 = new MaxPooling(16, 8, 8, 2, 2, 2);
-  Layer *gpu_fc12 = new FullyConnected(gpu_pool2->output_dim(), 120);
+  Layer *gpu_fc12 = new FullyConnected(gpu_pool22->output_dim(), 120);
   Layer *gpu_fc22 = new FullyConnected(120, 84);
   Layer *gpu_fc32 = new FullyConnected(84, 10);
   Layer *gpu_relu_conv12 = new ReLU;
