@@ -41,6 +41,8 @@ int main() {
   std::cout << "Fashion-mnist test samples: " << dataset.test_labels.cols() << std::endl;
   std::cout << "-----------------------------------------" << std::endl;
 
+  GpuTimer timer;
+
   std::cout << "GPU version:" << std::endl;
   Network gpu_dnn;
   Layer *gpu_conv1 = new ConvGPU1(1, 28, 28, 6, 5, 5);
