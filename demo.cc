@@ -29,8 +29,8 @@
 
 
 int main() {
-  cuda_helper cuda_helper;
-  cuda_helper.print_device_info();
+  kernels_utils k_utils;
+  k_utils.print_device_info();
 
   MNIST dataset("../data/fashion/");
   dataset.read();
