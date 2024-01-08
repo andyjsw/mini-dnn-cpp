@@ -56,8 +56,8 @@ __global__ void conv_forward_kernel_1(const float *in, float *out, const float *
     int height_out = height_in - kernel_width + 1;
     int width_out = width_in - kernel_width + 1;
 
-    extern __shared__ float shared_in[TILE_WIDTH][TILE_WIDTH];
-    extern __shared__ float shared_weight[TILE_WIDTH][TILE_WIDTH];
+    __shared__ float shared_in[TILE_WIDTH][TILE_WIDTH];
+    __shared__ float shared_weight[TILE_WIDTH][TILE_WIDTH];
 
     int row = (by / ((width_out - 1) / TILE_WIDTH + 1)) * TILE_WIDTH + ty;
     int col = (by % ((width_out - 1) / TILE_WIDTH + 1)) * TILE_WIDTH + tx;
@@ -139,7 +139,7 @@ __host__ void kernel_manager::conv_forward(const float *in, float *out, const fl
         CHECK(cudaDeviceSynchronize());
         CHECK(cudaGetLastError());
     } else if (kernel_type == 1) {
-        size_t sharedMemSize = TILE_WIDTH*TILE_WIDTH*sizeof(float)*2;
+        size_t sharedMemSize = TILE_WIDTH*TILE_WIDTH*sizeof(float)*2*2;
         conv_forward_kernel_1<<<dimGrid, dimBlock, sharedMemSize>>>(d_in, d_out, d_weight, channel_in, channel_out, height_in, width_in, kernel_width);
         CHECK(cudaDeviceSynchronize());
         CHECK(cudaGetLastError());
