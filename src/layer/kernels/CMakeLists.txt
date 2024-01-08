@@ -6,4 +6,3 @@ cuda_add_library(MiniDNNCudaLib ${CUDA_SRCS})
 
 # Specify the required CUDA libraries
 target_link_libraries(MiniDNNCudaLib ${CUDA_LIBRARIES})
-
