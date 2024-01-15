@@ -651,4 +651,3 @@ add_custom_target ( uninstall
 if (EIGEN_SPLIT_TESTSUITE)
   ei_split_testsuite("${EIGEN_SPLIT_TESTSUITE}")
 endif()
-

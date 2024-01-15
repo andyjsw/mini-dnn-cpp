@@ -34,4 +34,3 @@ foreach(snippet_src ${snippets_SRCS})
     message("skip snippet ${snippet_src} because compiler does not support C++11")
   endif()
 endforeach()
-

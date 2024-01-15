@@ -15,4 +15,3 @@ if (BLITZ_FOUND)
   endif ()
 
 endif ()
-

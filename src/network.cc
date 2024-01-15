@@ -1,12 +1,87 @@
 #include "./network.h"
 
+float computeError(Matrix a, Matrix b){
+  Matrix tmp = a-b;
+  return tmp.norm();
+
+}
+
 void Network::forward(const Matrix& input) {
   if (layers.empty())
     return;
-  layers[0]->forward(input);
+  Matrix host_out, kernel0_out, kernel1_out;
+  GpuTimer timer;
+  timer.Start();
+  layers[0]->cusForward(input, 0);
+  timer.Stop();
+  float time0 = timer.Elapsed();
+  kernel0_out = layers[0]->output();
   
+  timer.Start();
+  layers[0]->cusForward(input, 1);
+  timer.Stop();
+  float time1 = timer.Elapsed();
+  kernel1_out = layers[0]->output();
+  
+  
+  timer.Start();
+  layers[0]->forward(input);
+  timer.Stop();
+  float timeh = timer.Elapsed();
+  host_out = layers[0]->output();
+  printf("Convolution 1:\n\n");
+  printf("Host\n");
+  printf("Host time: %f s\n\n", timeh/1000);
+
+  float err0 = computeError(host_out, kernel0_out);
+  printf("Basic GPU Convolution kernel\n");
+  printf("Kernel time: %f s\n", time0/1000);
+  printf("Error: %f\n\n", err0);
+  
+  float err1 = computeError(host_out, kernel1_out);
+  printf("Using Share Memory GPU Convolution kernel\n");
+  printf("Kernel time: %f s\n", time1/1000);
+  printf("Error: %f\n", err1);
+  printf("-----------------------------------------\n");
   for (int i = 1; i < layers.size(); i++) {
-    layers[i]->forward(layers[i-1]->output());
+    if(i == 3){
+          Matrix host_out, kernel_0_out, kernel_1_out;
+          timer.Start();
+          layers[i]->cusForward(layers[i-1]->output(), 0);
+          timer.Stop();
+          float time_0 = timer.Elapsed();
+          kernel_0_out = layers[i]->output();
+          
+          
+          timer.Start();
+          layers[i]->cusForward(layers[i-1]->output(), 1);
+          timer.Stop();
+          float time_1 = timer.Elapsed();
+          kernel_1_out = layers[i]->output();
+          
+          timer.Start();
+          layers[i]->forward(layers[i-1]->output());
+          timer.Stop();
+          float timeh = timer.Elapsed();
+          host_out = layers[i]->output();
+          printf("Convolution 3:\n\n");
+          printf("Host\n");
+          printf("Host time: %f s\n\n", timeh/1000);
+        
+          float err_0 = computeError(host_out, kernel_0_out);
+          printf("Basic GPU Convolution kernel\n");
+          printf("Kernel time: %f s\n", time_0/1000);
+          printf("Error: %f\n\n", err_0);
+          
+          float err_1 = computeError(host_out, kernel_1_out);
+          printf("Using Share Memory GPU Convolution kernel\n");
+          printf("Kernel time: %f s\n", time_1/1000);
+          printf("Error: %f\n", err_1);
+          printf("-----------------------------------------\n");
+    }
+    else {
+        layers[i]->forward(layers[i-1]->output());
+    }
   }
 }
 
@@ -146,3 +221,4 @@ void Network::load_parameters(std::string filename)
     fin.close();
     this->set_parameters(param);
 }
+

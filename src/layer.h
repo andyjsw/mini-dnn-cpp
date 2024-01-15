@@ -15,6 +15,7 @@ class Layer {
   virtual ~Layer() {}
 
   virtual void forward(const Matrix& bottom) = 0;
+  virtual void cusForward(const Matrix& bottom, int kernelType) {};
   virtual void backward(const Matrix& bottom, const Matrix& grad_top) = 0;
   virtual void update(Optimizer& opt) {}
   virtual const Matrix& output() { return top; }

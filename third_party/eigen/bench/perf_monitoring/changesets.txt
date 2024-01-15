@@ -93,4 +93,3 @@ Load hg-to-git hash maps from ./eigen_git/.git/
 117670e133333d  # Bug 1661: fix regression in GEBP and AVX512
 11760f028f61cb  # GEBP: cleanup logic to choose between<br/> a 4 packets of 1 packet (=e118ce86fd+fix)
 1180de77bf5d6c  # gebp: Add new ½ and ¼ packet rows per (peeling) round on the lhs
-

@@ -49,20 +49,36 @@ void Conv::im2col(const Vector& image, Matrix& data_col) {
   }
 }
 
-void Conv::forward(const Matrix& bottom) {
-  int n_sample = bottom.cols();
-  top.resize(height_out * width_out * channel_out, n_sample);
-  data_cols.resize(n_sample);
-  for (int i = 0; i < n_sample; i ++) {
-    // im2col
-    Matrix data_col;
-    im2col(bottom.col(i), data_col);
-    data_cols[i] = data_col;
-    // conv by product
-    Matrix result = data_col * weight;  // result: (hw_out, channel_out)
-    result.rowwise() += bias.transpose();
-    top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
-  }
+void Conv::forward(const Matrix &bottom)
+{
+    int n_sample = bottom.cols();
+    top.resize(height_out * width_out * channel_out, n_sample);
+    data_cols.resize(n_sample);
+    for (int i = 0; i < n_sample; i++)
+    {
+        // im2col
+        Matrix data_col, result;
+        im2col(bottom.col(i), data_col);
+        data_cols[i] = data_col;
+        // conv by product
+        result = data_col * weight; 
+        //result.rowwise() += bias.transpose();
+        top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
+    }
+}
+
+
+void Conv::cusForward(const Matrix& bottom, int kernelType) {
+    int n_sample = bottom.cols();
+    data_cols.resize(n_sample);
+    top.resize(height_out * width_out * channel_out, n_sample);
+    
+    float* in = (float*)bottom.data();
+    float* out = (float*)top.data();
+    float* w = (float*)weight.data();
+    float* b = (float*)bias.data();
+    cuda_manager executor;
+    executor.conv_forward(in, out, w, b, n_sample, channel_in, channel_out, height_in, width_in, height_kernel, kernelType);
 }
 
 // col2im, used for grad_bottom

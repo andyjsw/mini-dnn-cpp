@@ -19,4 +19,3 @@ add_executable(mandelbrot ${mandelbrot_SRCS})
 add_dependencies(demos mandelbrot)
 
 target_link_libraries(mandelbrot ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
-
